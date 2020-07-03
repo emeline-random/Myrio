@@ -1,2 +1,2 @@
 # Myrio
-Mario Bross game made with Pygame
+Mario Bros game made with Pygame
