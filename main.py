@@ -37,23 +37,31 @@ def main():
                 done = True  # Flag that we are done so we exit this loop
 
             if event.type == pygame.KEYDOWN:
+                player.moving = True
                 if event.key == pygame.K_LEFT:
                     player.go_left()
                     constants.CURRENT_DIR = constants.GO_LEFT
                 if event.key == pygame.K_RIGHT:
                     player.go_right()
                     constants.CURRENT_DIR = constants.GO_RIGHT
-                if event.key == pygame.K_UP:
+                if event.key == pygame.K_SPACE:
                     player.jump()
                     constants.CURRENT_DIR = constants.GO_UP
                 if event.key == pygame.K_DOWN:
                     player.go_down()
                     constants.CURRENT_DIR = constants.GO_DOWN
+                if event.key == pygame.K_UP:
+                    player.go_up()
+                    constants.CURRENT_DIR = constants.CLIMB
 
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT and player.change_x < 0:
                     player.stop()
                 if event.key == pygame.K_RIGHT and player.change_x > 0:
+                    player.stop()
+                if event.key == pygame.K_UP and player.change_y < 0:
+                    player.stop()
+                if event.key == pygame.K_DOWN and player.change_y > 0:
                     player.stop()
 
         active_sprite_list.update()

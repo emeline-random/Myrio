@@ -16,6 +16,7 @@ class Level:
         self.enemy_list = pygame.sprite.Group()
         self.reward_list = pygame.sprite.Group()
         self.block_list = pygame.sprite.Group()
+        self.wall_list = pygame.sprite.Group()
         self.max_frames = None
         self.current_frame = 0
         self.number = -1
@@ -25,6 +26,7 @@ class Level:
         self.enemy_list.update()
         self.reward_list.update()
         self.block_list.update()
+        self.wall_list.update()
 
     def draw(self, screen):
         """ Draw everything on this level. """
@@ -46,6 +48,7 @@ class Level:
         self.enemy_list.draw(screen)
         self.reward_list.draw(screen)
         self.block_list.draw(screen)
+        self.wall_list.draw(screen)
 
     def shift_world(self, shift_x):
         """ When the user moves left/right and we need to scroll everything: """
@@ -62,6 +65,9 @@ class Level:
 
         for block in self.block_list:
             block.rect.x += shift_x
+
+        for wall in self.wall_list:
+            wall.rect.x += shift_x
 
     def add_flag(self, next_level):
         flag = Flag(next_level)

@@ -9,7 +9,7 @@ class MyLevel(level.Level):
     def __init__(self, player):
         level.Level.__init__(self, player)
 
-        self.background = pygame.image.load("data/background.png").convert()
+        self.background = pygame.image.load("data/background_l1.png").convert()
         self.background.set_colorkey(constants.WHITE)
         self.max_frames = 2
         self.number = 0
@@ -58,7 +58,7 @@ class MyLevel(level.Level):
                                                    300, 200, 390),
                     sprites.Platform(images.get_platform(images.GROUND, 145), 6214, 359),
                     sprites.Platform(images.get_platform(images.GROUND, 300, 550, images.GROUND_C), 6359, 0)]
-        level_pipes = [sprites.Pipe(self, 2750, 1776),
+        level_pipes = [sprites.Pipe(Level011(self.player, self), -350, 1776),
                        sprites.Pipe(level.Level02(self.player), 0, 2845, 0),
                        sprites.Pipe(level.Level02(self.player), 0, 5880, 339,
                                     images.get_platform(images.PIPE_B, 95, 215, images.PIPE_B_C))]
@@ -68,7 +68,9 @@ class MyLevel(level.Level):
                         sprites.Block(None, 2846, 396),
                         sprites.Block(None, 2892, 396),
                         sprites.QBlock(756, 135, sprites.Reward(None)),
-                        sprites.QBlock(1923, 48, sprites.Piece(1923, 48))]
+                        sprites.QBlock(1923, 48, sprites.Piece(1923, 48)),
+                        sprites.BreakableBlock(6313, 170),
+                        sprites.QBlock(6267, 170, sprites.Reward(None))]
         level_enemies = [sprites.GoombaEnemy(831, 270),
                          sprites.KoopaEnemy(3002, 358),
                          sprites.KoopaEnemy(3400, 358)]
@@ -93,3 +95,55 @@ class MyLevel(level.Level):
             self.enemy_list.add(enemy)
 
         self.add_flag(level.Level02(self.player))
+
+
+LEVEL01_1_platforms = pygame.image.load("data/level_1-1.png")
+
+
+class Level011(level.Level):
+    def __init__(self, player, sub_level):
+        level.Level.__init__(self, player)
+
+        self.background = pygame.image.load("data/background_l1-1.png").convert()
+        self.background.set_colorkey(constants.WHITE)
+        self.max_frames = 1
+        self.number = 0
+
+        platforms = sprites.Platform(LEVEL01_1_platforms, 0, 0)
+        platforms.player = self.player
+        self.platform_list.add(platforms)
+
+        pipe = sprites.Pipe(sub_level, 2500, 3774, 336,
+                            images.get_platform(images.PIPE_G, images.PIPE_G.get_rect().width, 225, images.PIPE_G_C))
+        pipe.level = self
+        pipe.player = self.player
+        self.platform_list.add(pipe)
+
+        level_blocks = [sprites.BreakableBlock(925, 297),
+                        sprites.QBlock(971, 297, sprites.Reward(None)),
+                        sprites.BreakableBlock(1017, 297),
+                        sprites.BreakableBlock(3192, 201),
+                        sprites.QBlock(3238, 201, sprites.Reward(None))]
+
+        level_enemies = [sprites.GoombaEnemy(969, 439),
+                         sprites.GoombaEnemy(1078, 439)]
+
+        level_walls = [sprites.ClimbingWall(2121, 297, images.get_platform(images.WALL, 96, 220, images.WALL_C,
+                                                                           images.WALL_B)),
+                       sprites.ClimbingWall(2290, 330),
+                       sprites.ClimbingWall(2451, 297, images.get_platform(images.WALL, 96, 220, images.WALL_C,
+                                                                           images.WALL_B)),
+                       sprites.ClimbingWall(2617, 260), sprites.ClimbingWall(3109, 323),
+                       sprites.ClimbingWall(3280, 323)]
+
+        for aBlock in level_blocks:
+            self.block_list.add(aBlock)
+            if isinstance(aBlock, sprites.BreakableBlock):
+                aBlock.level = self
+
+        for enemy in level_enemies:
+            enemy.player = self.player
+            self.enemy_list.add(enemy)
+
+        for wall in level_walls:
+            self.wall_list.add(wall)

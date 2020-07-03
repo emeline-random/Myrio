@@ -13,6 +13,12 @@ class ImagesSheet:
         image.set_colorkey(constants.WHITE)
         return image
 
+    def get_images(self, number, height, width, y):
+        images = []
+        for i in range(number):
+            images.append(self.getimage(i * width, y, width, height))
+        return images
+
 
 def get_platform(image, width, height=None, center_image=None, bottom_image=None):
     if not height:
@@ -57,15 +63,51 @@ def empiled_blocks(image, number):
     return surface
 
 
+sheet = ImagesSheet("data/mario.png")
+MARIO_RIGHT = sheet.get_images(25, 90, 68, 22)
+MARIO_LEFT = sheet.get_images(25, 90, 68, 126)
+MARIO_JUMP = sheet.getimage(1019, 3, 71, 89)
+MARIO_CLIMB = sheet.get_images(14, 81, 48, 227)
+MARIO_STOP = sheet.getimage(707, 220, 53, 90)
+MARIO_STOP_L = sheet.getimage(926, 247, 38, 58)
+MARIO_LITTLE_R = sheet.get_images(14, 60, 50, 335)
+MARIO_LITTLE_L = sheet.get_images(14, 60, 50, 400)
+MARIO = sheet.getimage(778, 217, 70, 98)
+MARIO_LITTLE = sheet.getimage(852, 244, 64, 73)
+
+
+def get_mario(player):
+    if not player.moving:
+        player.frame = 0
+        if player.climbing:
+            player.image = MARIO_CLIMB[0]
+        elif player.life > 2:
+            player.image = MARIO_STOP
+        else:
+            player.image = MARIO_STOP_L
+        return
+    elif player.climbing:
+        player.current_image(0, MARIO_CLIMB)
+    elif constants.GO_RIGHT == constants.CURRENT_DIR:  # choosing adapted image depending on the current direction
+        if player.life > 2:
+            player.current_image(2, MARIO_RIGHT)
+        else:
+            player.current_image(2.1, MARIO_LITTLE_R)
+    elif constants.GO_LEFT == constants.CURRENT_DIR:
+        if player.life > 2:
+            player.current_image(3, MARIO_LEFT)
+        else:
+            player.current_image(3.1, MARIO_LITTLE_L)
+    player.image = player.images[player.frame]
+
+
 sheet = ImagesSheet("data/sprites.png")
 FLAG_IMAGE = sheet.getimage(1341, 30, 156, 484)
-KOOPA_LEFT = sheet.getimage(85, 1, 62, 81)
-KOOPA_RIGHT = sheet.getimage(150, 2, 62, 81)
+KOOPA_LEFT = sheet.getimage(85, 1, 62, 79)
+KOOPA_RIGHT = sheet.getimage(150, 1, 62, 79)
 GOOMBA_LEFT = sheet.getimage(279, 5, 64, 44)
 GOOMBA_RIGHT = sheet.getimage(242, 6, 36, 44)
 PLATFORM = sheet.getimage(580, 179, 46, 24)
-MARIO_RIGHT = sheet.getimage(418, 2, 71, 91)
-MARIO_LEFT = sheet.getimage(918, 1, 71, 91)
 BLOCK = sheet.getimage(259, 179, 46, 47)
 Q_BLOCK = sheet.getimage(214, 179, 46, 47)
 BREAK_BLOCK = sheet.getimage(168, 179, 46, 47)
@@ -93,3 +135,7 @@ FLOWERS_B = sheet.getimage(0, 270, 190, 30)
 COLUMN = sheet.getimage(154, 1, 46, 47)
 COLUMN_C = sheet.getimage(212, 0, 46, 72)
 COLUMN_B = sheet.getimage(154, 49, 46, 25)
+sheet = ImagesSheet("data/gake.png")
+WALL = sheet.getimage(289, 72, 95, 25)
+WALL_C = sheet.getimage(289, 97, 95, 46)
+WALL_B = sheet.getimage(289, 146, 95, 16)
