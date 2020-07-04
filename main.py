@@ -1,7 +1,6 @@
 import pygame
 
 import constants
-from level_2 import Level02
 from level_1 import Level01
 
 from player import Player
@@ -17,7 +16,7 @@ def main():
     player = Player()
 
     # Set the current level
-    constants.CURRENT_LEVEL = Level02(player)
+    constants.CURRENT_LEVEL = Level01(player)
     constants.CURRENT_LEVEL.begin()
 
     active_sprite_list = pygame.sprite.Group()
@@ -62,7 +61,7 @@ def main():
                     player.stop(False, True)
                 elif event.key == pygame.K_DOWN and player.change_y > 0:
                     player.stop(False, True)
-                elif event.key == pygame.K_SPACE:
+                elif event.key == pygame.K_SPACE and player.swimming:
                     player.stop(False, True)
 
         active_sprite_list.update()
