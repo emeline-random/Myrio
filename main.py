@@ -1,8 +1,8 @@
 import pygame
 
 import constants
-from my_level import MyLevel
-import level01
+from level_2 import Level02
+from level_1 import Level01
 
 from player import Player
 
@@ -17,7 +17,8 @@ def main():
     player = Player()
 
     # Set the current level
-    constants.CURRENT_LEVEL = MyLevel(player)
+    constants.CURRENT_LEVEL = Level02(player)
+    constants.CURRENT_LEVEL.begin()
 
     active_sprite_list = pygame.sprite.Group()
     player.level = constants.CURRENT_LEVEL
@@ -55,14 +56,14 @@ def main():
                     constants.CURRENT_DIR = constants.CLIMB
 
             if event.type == pygame.KEYUP:
-                if event.key == pygame.K_LEFT and player.change_x < 0:
-                    player.stop()
-                if event.key == pygame.K_RIGHT and player.change_x > 0:
-                    player.stop()
-                if event.key == pygame.K_UP and player.change_y < 0:
-                    player.stop()
-                if event.key == pygame.K_DOWN and player.change_y > 0:
-                    player.stop()
+                if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
+                    player.stop(True, False)
+                elif event.key == pygame.K_UP and player.change_y < 0:
+                    player.stop(False, True)
+                elif event.key == pygame.K_DOWN and player.change_y > 0:
+                    player.stop(False, True)
+                elif event.key == pygame.K_SPACE:
+                    player.stop(False, True)
 
         active_sprite_list.update()
         constants.CURRENT_LEVEL.update()

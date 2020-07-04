@@ -28,11 +28,11 @@ class MovingSprite(SolidShape):
         self.change_y = 0
         self.change_x = 0
 
-    def calc_gravity(self):
+    def calc_gravity(self, gravity=constants.GRAVITY):
         if self.change_y == 0:
             self.change_y = 1
         else:
-            self.change_y += constants.GRAVITY
+            self.change_y += gravity
 
         # See if we are on the ground.
         if self.rect.y >= constants.HEIGHT - self.rect.height and self.change_y >= 0:
@@ -69,6 +69,7 @@ class Flag(SolidShape):
 
     def update_constants(self):
         constants.CURRENT_LEVEL = self.next_level
+        self.next_level.begin()
 
 
 class Platform(SolidShape):
@@ -95,12 +96,6 @@ class HorizontalMovingPlatform(Platform, MovingSprite):
 
     def update(self):
         self.rect.x += self.change_x
-        hit = pygame.sprite.collide_mask(self.player, self)
-        if hit:
-            if self.change_x > 0:  # moving right
-                self.player.rect.left = self.rect.right
-            else:  # moving left
-                self.player.rect.right = self.rect.left
         shift = constants.CURRENT_LEVEL.world_shift
         if self.rect.x <= self.boundary_left + shift or self.rect.right >= self.boundary_right + shift:
             self.change_x *= -1
@@ -119,10 +114,6 @@ class VerticalMovingPlatform(Platform):
 
     def update(self):
         self.rect.y += self.change_y
-        hit = pygame.sprite.collide_mask(self, self.player)
-        if hit:
-            if self.change_y < 0:  # moving up
-                self.player.rect.bottom = self.rect.top
         if self.rect.top <= self.boundary_top or self.rect.top >= self.boundary_bottom:
             self.change_y *= -1
 
@@ -147,9 +138,8 @@ class BreakableBlock(Block):
         self.level = None
 
     def update_constants(self):
-        if constants.GO_DOWN == constants.CURRENT_DIR and self.level.player.rect.bottom <= self.rect.y + 10:
-            self.kill()
-        elif constants.GO_UP == constants.CURRENT_DIR and self.level.player.rect.top >= self.rect.bottom - 10:
+        pl_rect = constants.CURRENT_LEVEL.player.rect
+        if pl_rect.y <= self.rect.bottom < pl_rect.bottom or constants.GO_DOWN == constants.CURRENT_DIR:
             self.kill()
 
 
@@ -160,10 +150,11 @@ class QBlock(Block):
 
     def update_constants(self):
         if self.reward is not None:
-            if constants.GO_UP == constants.CURRENT_DIR and constants.CURRENT_LEVEL.player.rect.top >= self.rect.bottom - 10:
-                self.reward_out(self.rect.y - self.reward.rect.height - 1)
-            elif constants.GO_DOWN == constants.CURRENT_DIR and constants.CURRENT_LEVEL.player.rect.bottom <= self.rect.y + 10:
+            pl_rect = constants.CURRENT_LEVEL.player.rect
+            if constants.GO_DOWN == constants.CURRENT_DIR:
                 self.reward_out(self.rect.bottom + 1)
+            elif pl_rect.y <= self.rect.bottom < pl_rect.bottom:
+                self.reward_out(self.rect.y - self.reward.rect.height - 1)
 
     def reward_out(self, y):
         self.reward.player = constants.CURRENT_LEVEL.player
@@ -197,6 +188,7 @@ class Pipe(SolidShape):
                 constants.CURRENT_LEVEL = self.relative_level
                 self.player.pipe = None
                 self.player.in_pipe = False
+                constants.CURRENT_LEVEL.begin()
                 constants.CURRENT_LEVEL.shift_world(-self.level_shift - constants.CURRENT_LEVEL.world_shift)
 
 
@@ -240,21 +232,81 @@ class Enemy(MovingSprite):
                 self.eat = False
 
     def update_constants(self):
-        if self.player.rect.bottom <= self.rect.top + 20:
+        if self.player.rect.bottom - self.player.change_y <= self.rect.top + 20:
             self.kill()
         elif not self.eat:
             self.eat = True
             self.player.remove_life()
 
 
-class KoopaEnemy(Enemy):
+class Koopa(Enemy):
     def __init__(self, x, y=0):
         super().__init__(images.KOOPA_LEFT, images.KOOPA_RIGHT, x, y)
 
 
-class GoombaEnemy(Enemy):
+class Goomba(Enemy):
     def __init__(self, x, y=0):
         super().__init__(images.GOOMBA_LEFT, images.GOOMBA_RIGHT, x, y)
+
+
+class Spike(Enemy):
+    def __init__(self, x, y=0):
+        super().__init__(images.SPIKE, None, x, y)
+        self.change_x = 0
+        self.thrown = False
+
+    def update(self):
+        if (not self.out) and constants.CURRENT_LEVEL.world_shift <= constants.WIDTH - self.rect.x:
+            self.out = True
+        if self.out:
+            if self.change_x > 0:
+                self.image = self.image_r
+            else:
+                self.image = self.image_l
+            if not pygame.sprite.collide_mask(self, self.player):
+                self.eat = False
+            right = self.rect.right
+            pl_rect = self.player.rect
+            if (not self.thrown) and (self.rect.x < pl_rect.x < right or self.rect.x < pl_rect.right < right):
+                self.thrown = True
+                constants.CURRENT_LEVEL.enemy_list.add(SpikeBomb(self.player, self.rect.x, self.rect.y))
+            elif not (self.rect.x < pl_rect.x < right or self.rect.x < pl_rect.right < right):
+                self.thrown = False
+
+
+class SpikeBomb(Enemy):
+    def __init__(self, player, x, y=0):
+        super().__init__(images.SPIKE_BOMB, None, x, y)
+        self.change_x = 0
+        self.change_y = constants.ENEMY_SPEED
+        self.player = player
+
+    def update(self):
+        self.rect.y += self.change_y
+        if self.rect.y > constants.HEIGHT:
+            self.kill()
+
+
+class Cheep(Enemy, HorizontalMovingPlatform):
+    def __init__(self, x, y, right, left):
+        Enemy.__init__(self, images.CHEEP_LEFT, images.CHEEP_RIGHT, x, y)
+        HorizontalMovingPlatform.__init__(self, images.CHEEP_RIGHT, x, y, right, left)
+        self.change_x = constants.ENEMY_SPEED
+
+
+class Hurchin(Enemy, VerticalMovingPlatform):
+    def __init__(self, x, y, top, bottom, big=False):
+        if big:
+            self.image_l = images.BIG_HURCHIN
+        else:
+            self.image_l = images.HURCHIN
+        Enemy.__init__(self, self.image_l, None, x, y)
+        self.change_x = 0
+        VerticalMovingPlatform.__init__(self, self.image_l, x, y, top, bottom)
+        self.change_y = constants.ENEMY_SPEED
+
+    def update(self):
+        VerticalMovingPlatform.update(self)
 
 
 class Reward(MovingSprite):

@@ -9,7 +9,7 @@ import images
 class Player(MovingSprite):
 
     def __init__(self):
-        super().__init__(images.MARIO)
+        super().__init__(images.MARIO_STOP_B)
         self.change_x = 0
         self.change_y = 0
         self.jump_number = 0
@@ -17,9 +17,11 @@ class Player(MovingSprite):
         self.pipe = None
         self.life = 3
         self.climbing = False
+        self.swimming = False
         self.frame = 0
         self.current = 0
-        self.images = images.MARIO_RIGHT
+        self.images = images.MARIO_BIG_R
+        self.mask = pygame.mask.from_surface(images.MARIO)
         self.moving = True
 
     def current_image(self, n, img):
@@ -34,7 +36,9 @@ class Player(MovingSprite):
 
     def update(self):
         images.get_mario(self)
-        if not self.climbing:
+        if self.swimming:
+            self.calc_gravity(constants.UNDERWATER_GRAVITY)
+        elif not self.climbing:
             self.calc_gravity()
 
         if self.in_pipe:  # Si le joueur est dans un tuyau il ne peut en sortir par les côtés
@@ -91,42 +95,46 @@ class Player(MovingSprite):
         exit(0)
 
     def remove_life(self):
+        self.life -= 1
         if self.life == 0:
             self.kill()
-        else:
-            self.mask = pygame.mask.from_surface(images.MARIO_LITTLE)
-            y = self.rect.y
-            x = self.rect.x
-            self.rect = images.MARIO_LITTLE.get_rect()
-            self.rect.y = y
-            self.rect.x = x
-            self.life -= 1
+        elif self.life == 1:
+            self.change_rect(images.MARIO_LITTLE)
 
     def add_life(self):
-        self.life = 3
-        self.mask = pygame.mask.from_surface(images.MARIO)
-        y = self.rect.y
+        self.life += 1
+        if self.life > 3:
+            self.life = 3
+        elif self.life == 2:
+            self.change_rect(images.MARIO)
+
+    def change_rect(self, image):
+        self.mask = pygame.mask.from_surface(image)
+        y = self.rect.bottom
         x = self.rect.x
-        self.rect = images.MARIO.get_rect()
-        self.rect.y = y - 50
+        self.rect = image.get_rect()
+        self.rect.y = y - self.rect.height
         self.rect.x = x
 
     def jump(self):
         # move down a bit and see if there is a platform below us.
-        self.climbing = False
-        self.rect.y += 2
-        platform_hit_list = sprites.spritecollide(self, constants.CURRENT_LEVEL.platform_list)
-        self.rect.y -= 2
+        if not self.swimming:
+            self.climbing = False
+            self.rect.y += 2
+            platform_hit_list = sprites.spritecollide(self, constants.CURRENT_LEVEL.platform_list)
+            self.rect.y -= 2
 
-        if len(platform_hit_list) > 0 or self.rect.bottom >= constants.HEIGHT:
-            self.change_y = -constants.PLAYER_JUMP
-            self.jump_number = 1
-        elif self.jump_number == 0:
-            self.jump_number = 1
-            self.change_y = -constants.PLAYER_JUMP
-        elif self.jump_number == 1:
-            self.change_y = -constants.PLAYER_JUMP * 1.5
-            self.jump_number = 2
+            if len(platform_hit_list) > 0 or self.rect.bottom >= constants.HEIGHT:
+                self.change_y = -constants.PLAYER_JUMP
+                self.jump_number = 1
+            elif self.jump_number == 0:
+                self.jump_number = 1
+                self.change_y = -constants.PLAYER_JUMP
+            elif self.jump_number == 1:
+                self.change_y = -constants.PLAYER_JUMP * 1.5
+                self.jump_number = 2
+        else:
+            self.go_up()
 
     def go_left(self):
         self.change_x = -constants.PLAYER_SPEED
@@ -141,8 +149,18 @@ class Player(MovingSprite):
         if pygame.sprite.spritecollide(self, constants.CURRENT_LEVEL.wall_list, False):
             self.climbing = True
             self.change_y = -constants.PLAYER_SPEED
+        elif self.swimming:
+            self.change_y = -constants.PLAYER_SPEED
 
-    def stop(self):
-        self.change_x = 0
-        self.change_y = 0
-        self.moving = False
+    def stop(self, x=True, y=True):
+        if x:
+            self.change_x = 0
+        if y:
+            self.change_y = 0
+        if self.change_x == 0 and self.change_y == 0:
+            self.moving = False
+
+    def set_swim(self, boolean):
+        self.swimming = boolean
+        if self.swimming:
+            self.change_rect(images.MARIO_SWIM)

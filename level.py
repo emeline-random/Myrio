@@ -21,6 +21,9 @@ class Level:
         self.current_frame = 0
         self.number = -1
 
+    def begin(self):
+        pass
+
     def update(self):
         self.platform_list.update()
         self.enemy_list.update()
