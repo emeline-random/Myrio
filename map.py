@@ -1,4 +1,3 @@
-# TODO faire une carte pour arriver la dessus sur les niveaux parce que sinon c'est dégueulasse
 import images
 import pygame
 from level import Level
