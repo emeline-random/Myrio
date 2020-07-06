@@ -1,5 +1,6 @@
 import pygame
 import constants
+import images
 from sprites import Flag
 from sprites import StarCoin
 
@@ -17,6 +18,7 @@ class Level:
         self.block_list = pygame.sprite.Group()
         self.wall_list = pygame.sprite.Group()
         self.star_coins = pygame.sprite.Group()
+        self.lists = [self.platform_list, self.block_list, self.wall_list, self.enemy_list, self.reward_list]
         self.max_frames = None
         self.current_frame = 0
         self.number = -1
@@ -25,16 +27,17 @@ class Level:
         self.player.climbing = False
         self.player.swimming = False
         self.player.jump_number = 0
+        if self.player.size > 1:
+            self.player.change_rect(images.MARIO)
+        else:
+            self.player.change_rect(images.MARIO_LITTLE)
 
     def update(self):
-        self.platform_list.update()
-        self.enemy_list.update()
-        self.reward_list.update()
-        self.block_list.update()
-        self.wall_list.update()
+        for aList in self.lists:
+            aList.update()
 
     def draw(self, screen):
-        """ Draw everything on this level. """
+        """ Draw everything on this level. The background is drawn two times so that the entire screen is fill"""
         screen.fill(constants.WHITE)
         if 0 <= self.background_shift // 3 <= constants.WIDTH:
             screen.blit(self.background, (self.background_shift // 3, 0))
@@ -49,30 +52,16 @@ class Level:
             screen.blit(self.background, (self.background_shift // 3, 0))
             screen.blit(self.background, (constants.WIDTH + self.background_shift // 3, 0))
 
-        self.platform_list.draw(screen)
-        self.block_list.draw(screen)
-        self.wall_list.draw(screen)
-        self.enemy_list.draw(screen)
-        self.reward_list.draw(screen)
+        for aList in self.lists:
+            aList.draw(screen)
 
     def shift_world(self, shift_x):
         """ When the user moves left/right and we need to scroll everything: """
         self.world_shift += shift_x
         self.background_shift += shift_x
-        for platform in self.platform_list:
-            platform.rect.x += shift_x
-
-        for enemy in self.enemy_list:
-            enemy.rect.x += shift_x
-
-        for reward in self.reward_list:
-            reward.rect.x += shift_x
-
-        for block in self.block_list:
-            block.rect.x += shift_x
-
-        for wall in self.wall_list:
-            wall.rect.x += shift_x
+        for aList in self.lists:
+            for sprite in aList:
+                sprite.rect.x += shift_x
 
     def add_flag(self, x):
         flag = Flag(x)
@@ -89,13 +78,12 @@ class Level:
         for coin in coins:
             if coin.found:
                 for c in self.reward_list:
-                    if isinstance(c, StarCoin):
-                        if c.position == coin.position:
-                            self.star_coins.remove(c)
-                            self.star_coins.add(coin)
-                            self.reward_list.remove(c)
-                            self.reward_list.add(coin)
-                            break
+                    if isinstance(c, StarCoin) and c.position == coin.position:
+                        self.star_coins.remove(c)
+                        self.star_coins.add(coin)
+                        self.reward_list.remove(c)
+                        self.reward_list.add(coin)
+                        break
 
 
 class SubLevel(Level):

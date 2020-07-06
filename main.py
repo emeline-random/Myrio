@@ -1,16 +1,10 @@
 import pygame
 
 import constants
+import utils
 from map import Map
 from player import Player
 import images
-
-
-def change_level(level, player):
-    constants.CURRENT_LEVEL = level
-    constants.CURRENT_LEVEL.begin()
-    player.rect.x = 50
-    player.rect.y = constants.HEIGHT - player.rect.height - 200
 
 
 def main():
@@ -31,7 +25,6 @@ def main():
 
     active_sprite_list = pygame.sprite.Group()
     player.level = constants.CURRENT_LEVEL
-
     player.rect.x = 50
     player.rect.y = constants.HEIGHT - player.rect.height - 200
     active_sprite_list.add(player)
@@ -40,7 +33,7 @@ def main():
     done = False
     clock = pygame.time.Clock()
 
-    # -------- Main Program Loop -----------
+    # -------- Main Game Loop -----------
     while not done:
         for event in pygame.event.get():  # User did something
             if event.type == pygame.QUIT:  # If user clicked close
@@ -92,7 +85,9 @@ def main():
         if player.size == 0:
             player.increase_size()
             constants.CURRENT_LEVEL.reset()
-            change_level(constants.MAP, player)
+            utils.change_level(constants.MAP)
+            player.rect.x = 50
+            player.rect.y = constants.HEIGHT - player.rect.height - 200
             player.remove_life()
 
         constants.CURRENT_LEVEL.draw(screen)

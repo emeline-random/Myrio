@@ -10,8 +10,6 @@ class Player(MovingSprite):
 
     def __init__(self):
         super().__init__(images.MARIO_STOP_B)
-        self.change_x = 0
-        self.change_y = 0
         self.jump_number = 0
         self.in_pipe = False
         self.pipe = None
@@ -19,21 +17,24 @@ class Player(MovingSprite):
         self.lives = 5
         self.climbing = False
         self.swimming = False
+        self.moving = True
         self.frame = 0
         self.current = 0
         self.images = images.MARIO_BIG_R
         self.mask = pygame.mask.from_surface(images.MARIO)
-        self.moving = True
 
     def current_image(self, n, img):
-        if self.current == n:
-            self.frame += 1
-            if len(self.images) < self.frame + 1:
-                self.frame = 0
+        if n < 0:
+            self.image = img
         else:
-            self.images = img
-            self.frame = 0
-            self.current = n
+            if self.current == n:
+                self.frame += 1
+                if len(self.images) < self.frame + 1:
+                    self.frame = 0
+            else:
+                self.images = img
+                self.frame = 0
+                self.current = n
 
     def update(self):
         images.get_mario(self)
@@ -120,7 +121,7 @@ class Player(MovingSprite):
         y = self.rect.bottom
         x = self.rect.x
         self.rect = image.get_rect()
-        self.rect.y = y - self.rect.height - 5
+        self.rect.y = y - self.rect.height - 10
         self.rect.x = x
 
     def jump(self):

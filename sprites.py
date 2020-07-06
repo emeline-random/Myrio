@@ -2,6 +2,7 @@ import pygame
 
 import constants
 import images
+import utils
 
 
 def sprite_collide(sprite, group):
@@ -9,6 +10,7 @@ def sprite_collide(sprite, group):
 
 
 class SolidShape(pygame.sprite.Sprite):
+
     def __init__(self, image, x=0, y=0):
         super().__init__()
         self.image = image
@@ -22,6 +24,7 @@ class SolidShape(pygame.sprite.Sprite):
 
 
 class MovingSprite(SolidShape):
+
     def __init__(self, image, x=0, y=0):
         super().__init__(image, x, y)
         self.speed = constants.DEFAULT_SPEED
@@ -58,6 +61,7 @@ class MovingSprite(SolidShape):
 
 
 class Flag(SolidShape):
+
     def __init__(self, shift):
         super().__init__(images.FLAG_IMAGE)
         self.shift = shift
@@ -66,8 +70,7 @@ class Flag(SolidShape):
         constants.CURRENT_LEVEL.end()
         if constants.CURRENT_LEVEL.player.rect.bottom < self.rect.y + 100:
             constants.CURRENT_LEVEL.player.add_life()
-        constants.CURRENT_LEVEL = constants.MAP
-        constants.CURRENT_LEVEL.begin()
+        utils.change_level(constants.MAP)
         constants.CURRENT_LEVEL.shift_world = self.shift
 
 
@@ -75,12 +78,10 @@ class Platform(SolidShape):
 
     def __init__(self, image, x=0, y=0):
         super().__init__(image, x, y)
-
         self.boundary_left = 0
         self.boundary_right = 0
         self.boundary_top = 0
         self.boundary_bottom = 0
-
         self.level = None
         self.player = None
 
@@ -121,6 +122,7 @@ class VerticalMovingPlatform(Platform):
 
 
 class Block(SolidShape):
+
     def __init__(self, image, x=0, y=0):
         if image is None:
             super().__init__(images.BLOCK, x, y)
@@ -129,6 +131,7 @@ class Block(SolidShape):
 
 
 class BreakableBlock(Block):
+
     def __init__(self, x=0, y=0, image=None):
         if image:
             super().__init__(image, x, y)
@@ -143,6 +146,7 @@ class BreakableBlock(Block):
 
 
 class QBlock(Block):
+
     def __init__(self, x=0, y=0, reward=None, down=False):
         super().__init__(images.Q_BLOCK, x, y)
         self.reward = reward
@@ -198,6 +202,7 @@ class Pipe(SolidShape):
         self.player.in_pipe = True
         self.player.pipe = self
         if in_pipe:
+            utils.change_level(self.relative_level)
             constants.CURRENT_LEVEL = self.relative_level
             self.player.pipe = None
             self.player.in_pipe = False
@@ -212,6 +217,7 @@ class ClimbingWall(SolidShape):
 
 
 class Enemy(MovingSprite):
+
     def __init__(self, image_l, image_r, x=0, y=0, killable=True):
         self.killable = killable
         if image_l is not None:
@@ -264,6 +270,7 @@ class Goomba(Enemy):
 
 
 class Spike(Enemy):
+
     def __init__(self, x, y=0):
         super().__init__(images.SPIKE, None, x, y)
         self.change_x = 0
@@ -289,6 +296,7 @@ class Spike(Enemy):
 
 
 class SpikeBomb(Enemy):
+
     def __init__(self, player, x, y=0):
         super().__init__(images.SPIKE_BOMB, None, x, y, False)
         self.change_x = 0
@@ -302,6 +310,7 @@ class SpikeBomb(Enemy):
 
 
 class Cheep(Enemy, HorizontalMovingPlatform):
+
     def __init__(self, x, y, right, left):
         Enemy.__init__(self, images.CHEEP_LEFT, images.CHEEP_RIGHT, x, y, False)
         HorizontalMovingPlatform.__init__(self, images.CHEEP_RIGHT, x, y, right, left)
@@ -309,6 +318,7 @@ class Cheep(Enemy, HorizontalMovingPlatform):
 
 
 class Hurchin(Enemy, VerticalMovingPlatform):
+
     def __init__(self, x, y, top, bottom, big=False):
         if big:
             self.image_l = images.BIG_HURCHIN
@@ -324,6 +334,7 @@ class Hurchin(Enemy, VerticalMovingPlatform):
 
 
 class Reward(MovingSprite):
+
     def __init__(self, image, x=0, y=0):
         if image is None:
             super().__init__(images.CHAMPI, x, y)
@@ -339,6 +350,7 @@ class Reward(MovingSprite):
 
 
 class Coin(Reward):
+
     def __init__(self, x=0, y=0, moving=False, speed=-constants.REWARD_SPEED * 0.0001, image=images.PIECE):
         super().__init__(image, x, y)
         if not moving:
@@ -364,6 +376,7 @@ class Coin(Reward):
 
 
 class StarCoin(Coin):
+
     def __init__(self, x=0, y=0, position=0):
         super().__init__(x, y, False, None, images.STAR_PIECE)
         self.change_x = 0
@@ -383,6 +396,7 @@ class StarCoin(Coin):
 
 
 class LevelRound(SolidShape):
+
     def __init__(self, x, y, level, shift=0):
         super().__init__(images.LEVEL, x, y)
         self.level = level

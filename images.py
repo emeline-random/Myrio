@@ -23,44 +23,25 @@ class ImagesSheet:
 def get_platform(image, width, height=None, center_image=None, bottom_image=None):
     if not height:
         surface = pygame.Surface((width, image.get_rect().height), pygame.SRCALPHA)
-        i = 0
-        while i < width:
-            surface.blit(image, (i, 0))
-            i += image.get_rect().width
+        paint_width(surface, image, 0)
     else:
         surface = pygame.Surface((width, height), pygame.SRCALPHA)
-        i = 0
-        while i < width:
-            surface.blit(image, (i, 0))
-            i += image.get_rect().width
+        paint_width(surface, image, 0)
         j = image.get_rect().height
         while j < height:
-            i = 0
-            while i < width:
-                surface.blit(center_image, (i, j))
-                i += center_image.get_rect().width
+            paint_width(surface, center_image, j)
             j += center_image.get_rect().height
-        i = 0
         if bottom_image:
-            while i < width:
-                surface.blit(bottom_image, (i, surface.get_rect().height - bottom_image.get_rect().height))
-                i += image.get_rect().width
+            paint_width(surface, bottom_image, surface.get_rect().height - bottom_image.get_rect().height)
 
     return surface
 
 
-def get_blocks(image, number):
-    surface = pygame.Surface((image.get_rect().width * number, image.get_rect().height), pygame.SRCALPHA)
-    for i in range(number):
-        surface.blit(image, (i * image.get_rect().width, 0))
-    return surface
-
-
-def empiled_blocks(image, number):
-    surface = pygame.Surface((image.get_rect().width, image.get_rect().height * number), pygame.SRCALPHA)
-    for i in range(number):
-        surface.blit(image, (0, image.get_rect().height * i))
-    return surface
+def paint_width(surface, image, y):
+    i = 0
+    while i < surface.get_rect().width:
+        surface.blit(image, (i, y))
+        i += image.get_rect().width
 
 
 sheet = ImagesSheet("data/mario.png")
@@ -89,12 +70,8 @@ def get_mario(player):
             player.image = MARIO_CLIMB[0]
         elif player.swimming:
             player.image = SWIM_R[0]
-        elif player.size == 2:
-            player.image = MARIO_STOP
-        elif player.size == 1:
-            player.image = MARIO_STOP_L
         else:
-            player.image = MARIO_STOP_B
+            get_sized_mario(MARIO_STOP_L, MARIO_STOP, MARIO_STOP_B, player, -1)
         return
     elif player.climbing:
         player.current_image(0, MARIO_CLIMB)
@@ -105,21 +82,20 @@ def get_mario(player):
             player.current_image(3.3, SWIM_L)
         else:
             player.current_image(player.current, None)
-    elif constants.GO_RIGHT == constants.CURRENT_DIR:  # choosing adapted image depending on the current direction
-        if player.size == 2:
-            player.current_image(2, MARIO_RIGHT)
-        elif player.size == 1:
-            player.current_image(2.1, MARIO_LITTLE_R)
-        else:
-            player.current_image(2.2, MARIO_BIG_R)
-    elif constants.GO_LEFT == constants.CURRENT_DIR:
-        if player.size == 2:
-            player.current_image(3, MARIO_LEFT)
-        elif player.size == 1:
-            player.current_image(3.1, MARIO_LITTLE_L)
-        else:
-            player.current_image(3.2, MARIO_BIG_L)
+    elif player.change_x > 0:  # choosing adapted image depending on the current direction
+        get_sized_mario(MARIO_LITTLE_R, MARIO_RIGHT, MARIO_BIG_R, player, 2)
+    elif player.change_x < 0:
+        get_sized_mario(MARIO_LITTLE_L, MARIO_LEFT, MARIO_BIG_L, player, 3)
     player.image = player.images[player.frame]
+
+
+def get_sized_mario(little, middle, big, player, number=None):
+    if player.size == 1:
+        player.current_image(number, little)
+    elif player.size == 2:
+        player.current_image(number + .1, middle)
+    else:
+        player.current_image(number + .2, big)
 
 
 sheet = ImagesSheet("data/sprites_2.png")
@@ -158,7 +134,7 @@ PIPE_B_C = sheet.getimage(908, 374, 95, 35)
 PIECE = sheet.getimage(813, 89, 38, 45)
 STAR_PIECE = sheet.getimage(762, 500, 129, 126)
 STAR_PIECE_L = sheet.getimage(911, 505, 46, 45)
-sheet = ImagesSheet("data/level_1.png")
+sheet = ImagesSheet("data/platforms.png")
 GROUND = sheet.getimage(0, 0, 142, 70)
 GROUND_C = sheet.getimage(0, 22, 142, 48)
 FLOWERS = sheet.getimage(0, 78, 190, 119)
