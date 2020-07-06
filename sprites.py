@@ -175,7 +175,7 @@ class QBlock(Block):
 class Pipe(SolidShape):
 
     def __init__(self, relative_level, level_shift, x=0, y=constants.HEIGHT - images.PIPE.get_rect().height,
-                 image=images.PIPE):
+                 image=images.PIPE, y_in=None, top_pipe=False):
         super().__init__(image, x, y)
         self.relative_level = relative_level
         self.level_shift = level_shift
@@ -183,17 +183,26 @@ class Pipe(SolidShape):
         self.on_right = False
         self.player = None
         self.level = None
+        self.top = top_pipe
+        if not y_in:
+            y_in = self.rect.bottom - 5
+        self.y_in = y_in
 
     def update_constants(self):
-        if constants.GO_DOWN == constants.CURRENT_DIR:
-            self.player.in_pipe = True
-            self.player.pipe = self
-            if self.player.rect.y + self.player.rect.height >= self.rect.bottom - 5:
-                constants.CURRENT_LEVEL = self.relative_level
-                self.player.pipe = None
-                self.player.in_pipe = False
-                constants.CURRENT_LEVEL.begin()
-                constants.CURRENT_LEVEL.shift_world(-self.level_shift - constants.CURRENT_LEVEL.world_shift)
+        if self.top and constants.GO_UP == constants.CURRENT_DIR:
+            self.go_in(self.player.rect.top <= self.y_in)
+        elif constants.GO_DOWN == constants.CURRENT_DIR:
+            self.go_in(self.player.rect.bottom >= self.y_in)
+
+    def go_in(self, in_pipe):
+        self.player.in_pipe = True
+        self.player.pipe = self
+        if in_pipe:
+            constants.CURRENT_LEVEL = self.relative_level
+            self.player.pipe = None
+            self.player.in_pipe = False
+            constants.CURRENT_LEVEL.begin()
+            constants.CURRENT_LEVEL.shift_world(-self.level_shift - constants.CURRENT_LEVEL.world_shift)
 
 
 class ClimbingWall(SolidShape):

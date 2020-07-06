@@ -26,6 +26,11 @@ class Level2(level.Level):
         pipe.level = self
         pipe.player = self.player
         self.platform_list.add(pipe)
+        pipe2 = sprites.Pipe(Level2_1(self.player, self), 0, 2445, 415, images.get_platform(
+            images.PIPE_R, images.PIPE_R.get_rect().width, 140, images.PIPE_R_C))
+        pipe2.level = self
+        pipe2.player = self.player
+        self.platform_list.add(pipe2)
 
         level_blocks = [sprites.BreakableBlock(983, 256),
                         sprites.QBlock(1029, 256, sprites.Reward(None)),
@@ -66,3 +71,27 @@ class Level2(level.Level):
 
     def begin(self):
         self.player.set_swim(True)
+
+
+class Level2_1(level.SubLevel):
+    def __init__(self, player, over_level):
+        super().__init__(player, over_level)
+        self.background = pygame.image.load("data/background_l2-1.png").convert()
+
+        platform = sprites.Platform(images.get_platform(images.PIPE_R, 90, 145, images.PIPE_R_C), 210, 412)
+        self.platform_list.add(platform)
+        level_platforms = [sprites.VerticalMovingPlatform(images.PLATFORM_Y, 380, 365, 175, 475),
+                           sprites.VerticalMovingPlatform(images.PLATFORM_Y, 705, 290, 175, 475),
+                           sprites.VerticalMovingPlatform(images.PLATFORM_Y, 1025, 365, 175, 475)]
+        pipe = sprites.Pipe(over_level, 2070, 1305, 412, images.get_platform(images.PIPE_R, 90, 145, images.PIPE_R_C))
+        pipe.level = self
+        pipe.player = self.player
+        self.platform_list.add(pipe)
+
+        star_coin = sprites.StarCoin(730, 10, 1)
+        self.reward_list.add(star_coin)
+        over_level.star_coins.add(star_coin)
+
+        for platform in level_platforms:
+            platform.player = self.player
+            self.platform_list.add(platform)
