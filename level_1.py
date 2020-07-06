@@ -3,10 +3,9 @@ import images
 import sprites
 import level
 import pygame
-from level_2 import Level02
 
 
-class Level01(level.Level):
+class Level1(level.Level):
     def __init__(self, player):
         level.Level.__init__(self, player)
 
@@ -59,9 +58,9 @@ class Level01(level.Level):
                                                    300, 200, 390),
                     sprites.Platform(images.get_platform(images.GROUND, 145), 6214, 359),
                     sprites.Platform(images.get_platform(images.GROUND, 300, 550, images.GROUND_C), 6359, 0)]
-        level_pipes = [sprites.Pipe(Level011(self.player, self), -350, 1776),
-                       sprites.Pipe(level.Level02(self.player), 0, 2845, 0),
-                       sprites.Pipe(Level02(self.player), 0, 5880, 339,
+        level_pipes = [sprites.Pipe(Level1_1(self.player, self), -350, 1776),
+                       sprites.Pipe(None, 0, 2845, 0),
+                       sprites.Pipe(Level1_2(self.player, self), 0, 5880, 339,
                                     images.get_platform(images.PIPE_B, 95, 215, images.PIPE_B_C))]
         level_blocks = [sprites.BreakableBlock(710, 135),
                         sprites.BreakableBlock(802, 135),
@@ -69,12 +68,23 @@ class Level01(level.Level):
                         sprites.Block(None, 2846, 396),
                         sprites.Block(None, 2892, 396),
                         sprites.QBlock(756, 135, sprites.Reward(None)),
-                        sprites.QBlock(1923, 48, sprites.Piece(1923, 48)),
+                        sprites.QBlock(1923, 48, sprites.Coin(1923, 48)),
                         sprites.BreakableBlock(6313, 170),
                         sprites.QBlock(6267, 170, sprites.Reward(None))]
         level_enemies = [sprites.Goomba(831, 270),
                          sprites.Koopa(3002, 358),
                          sprites.Koopa(3400, 358)]
+
+        star0 = sprites.StarCoin(1615, 418, 0)
+        star2 = sprites.StarCoin(5220, 0, 2)
+        self.star_coins.add(star0)
+        self.star_coins.add(star2)
+        level_coins = [sprites.Coin(720, 42), sprites.Coin(759, 3), sprites.Coin(796, 42), sprites.Coin(1070, 205),
+                       sprites.Coin(1210, 160), sprites.Coin(1412, 205), sprites.Coin(1950, 455),
+                       sprites.Coin(1997, 455), sprites.Coin(2042, 455), sprites.Coin(2090, 455),
+                       sprites.Coin(3104, 270), sprites.Coin(3146, 225), sprites.Coin(3200, 225),
+                       sprites.Coin(3240, 270), sprites.Coin(3545, 268), sprites.Coin(4210, 0, True, 0),
+                       sprites.Coin(4255, 0, True, 0), sprites.Coin(4300, 0, True, 0), star0, star2]
 
         # Go through the arrays above and add platforms
         for platform in platform:
@@ -91,29 +101,29 @@ class Level01(level.Level):
         for enemy in level_enemies:
             enemy.player = self.player
             self.enemy_list.add(enemy)
+        for coin in level_coins:
+            self.reward_list.add(coin)
 
 
-LEVEL01_1_platforms = pygame.image.load("data/level_1-1.png")
-
-
-class Level011(level.Level):
-    def __init__(self, player, sub_level):
-        level.Level.__init__(self, player)
-
+class Level1_1(level.SubLevel):
+    def __init__(self, player, over_level):
+        super().__init__(player, over_level)
         self.background = pygame.image.load("data/background_l1-1.png").convert()
         self.background.set_colorkey(constants.WHITE)
         self.max_frames = 1
         self.number = 0
 
-        platforms = sprites.Platform(LEVEL01_1_platforms, 0, 0)
+        platforms = sprites.Platform(pygame.image.load("data/level_1-1.png"), 0, 0)
         platforms.player = self.player
         self.platform_list.add(platforms)
 
-        pipe = sprites.Pipe(sub_level, 2500, 3774, 336,
+        pipe = sprites.Pipe(over_level, 2500, 3774, 336,
                             images.get_platform(images.PIPE_G, images.PIPE_G.get_rect().width, 225, images.PIPE_G_C))
         pipe.level = self
         pipe.player = self.player
         self.platform_list.add(pipe)
+        star1 = sprites.StarCoin(2265, 95, 1)
+        over_level.star_coins.add(star1)
 
         level_blocks = [sprites.BreakableBlock(925, 297),
                         sprites.QBlock(971, 297, sprites.Reward(None)),
@@ -128,11 +138,17 @@ class Level011(level.Level):
 
         level_walls = [sprites.ClimbingWall(2121, 297, images.get_platform(images.WALL, 96, 220, images.WALL_C,
                                                                            images.WALL_B)),
-                       sprites.ClimbingWall(2290, 330),
-                       sprites.ClimbingWall(2451, 297, images.get_platform(images.WALL, 96, 220, images.WALL_C,
-                                                                           images.WALL_B)),
-                       sprites.ClimbingWall(2617, 260), sprites.ClimbingWall(3109, 323),
-                       sprites.ClimbingWall(3280, 323)]
+                       sprites.ClimbingWall(2290, 330), sprites.ClimbingWall(2451, 297, images.get_platform(
+                         images.WALL, 96, 220, images.WALL_C, images.WALL_B)), sprites.ClimbingWall(2617, 260),
+                       sprites.ClimbingWall(3109, 323), sprites.ClimbingWall(3280, 323)]
+
+        level_coins = [sprites.Coin(925, 148), sprites.Coin(950, 105), sprites.Coin(990, 105), sprites.Coin(1015, 148),
+                       sprites.Coin(1707, 265), sprites.Coin(1830, 160), sprites.Coin(1975, 255),
+                       sprites.Coin(2127, 310), sprites.Coin(2178, 358), sprites.Coin(2127, 400),
+                       sprites.Coin(2178, 455), sprites.Coin(2510, 310), sprites.Coin(2458, 358),
+                       sprites.Coin(2510, 400), sprites.Coin(2458, 455), sprites.Coin(3200, 270),
+                       sprites.Coin(3245, 270), sprites.Coin(3200, 90), sprites.Coin(3245, 90), sprites.Coin(3782, 285),
+                       sprites.Coin(3830, 285), star1]
 
         for aBlock in level_blocks:
             self.block_list.add(aBlock)
@@ -143,3 +159,28 @@ class Level011(level.Level):
             self.enemy_list.add(enemy)
         for wall in level_walls:
             self.wall_list.add(wall)
+        for coin in level_coins:
+            self.reward_list.add(coin)
+
+
+class Level1_2(level.SubLevel):
+    def __init__(self, player, over_level):
+        super().__init__(player, over_level)
+        self.background = pygame.image.load("data/background_l1.png").convert()
+        self.background.set_colorkey(constants.WHITE)
+        self.max_frames = 0
+        self.number = 0
+
+        platforms = sprites.Platform(pygame.image.load("data/level_1-2.png"), 0, 0)
+        platforms.player = self.player
+        self.platform_list.add(platforms)
+
+        level_enemies = [sprites.Koopa(612, 373),
+                         sprites.Koopa(729, 303),
+                         sprites.Koopa(852, 223)]
+
+        for enemy in level_enemies:
+            enemy.player = self.player
+            self.enemy_list.add(enemy)
+
+        self.add_flag(25)

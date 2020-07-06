@@ -1,8 +1,7 @@
 import pygame
 import constants
-import sprites as blocks
 from sprites import Flag
-import images
+from sprites import StarCoin
 
 
 class Level:
@@ -17,12 +16,15 @@ class Level:
         self.reward_list = pygame.sprite.Group()
         self.block_list = pygame.sprite.Group()
         self.wall_list = pygame.sprite.Group()
+        self.star_coins = pygame.sprite.Group()
         self.max_frames = None
         self.current_frame = 0
         self.number = -1
 
     def begin(self):
-        pass
+        self.player.climbing = False
+        self.player.swimming = False
+        self.player.jump_number = 0
 
     def update(self):
         self.platform_list.update()
@@ -48,10 +50,10 @@ class Level:
             screen.blit(self.background, (constants.WIDTH + self.background_shift // 3, 0))
 
         self.platform_list.draw(screen)
-        self.enemy_list.draw(screen)
-        self.reward_list.draw(screen)
         self.block_list.draw(screen)
         self.wall_list.draw(screen)
+        self.enemy_list.draw(screen)
+        self.reward_list.draw(screen)
 
     def shift_world(self, shift_x):
         """ When the user moves left/right and we need to scroll everything: """
@@ -72,55 +74,38 @@ class Level:
         for wall in self.wall_list:
             wall.rect.x += shift_x
 
-    def add_flag(self, next_level):
-        flag = Flag(next_level)
-        flag.rect.x = constants.WIDTH * (1 + self.max_frames * 3)
+    def add_flag(self, x):
+        flag = Flag(x)
+        flag.rect.x = constants.WIDTH * (self.max_frames * 3 + 0.75)
         flag.rect.y = constants.HEIGHT - flag.rect.height
         self.platform_list.add(flag)
 
+    def reset(self):
+        self.__init__(self.player)
 
-class Level02(Level):
-    """ Definition for level 2. """
+    def end(self):
+        coins = self.star_coins
+        self.reset()
+        for coin in coins:
+            if coin.found:
+                for c in self.reward_list:
+                    if isinstance(c, StarCoin):
+                        if c.position == coin.position:
+                            self.star_coins.remove(c)
+                            self.star_coins.add(coin)
+                            self.reward_list.remove(c)
+                            self.reward_list.add(coin)
+                            break
 
-    def __init__(self, player):
-        """ Create level 2. """
-        # Call the parent constructor
-        Level.__init__(self, player)
 
-        self.background = pygame.image.load("data/background2.png").convert()
-        self.background.set_colorkey(constants.WHITE)
-        self.max_frames = 1
-        self.number = 1
+class SubLevel(Level):
+    def __init__(self, player, over_level):
+        super().__init__(player)
+        self.over_level = over_level
+        self.star_coins = over_level.star_coins
 
-        # Array with type of platform, and x, y location of the platform.
-        level = [[images.PLATFORM, 500, 500],
-                 [images.PLATFORM, 533, 500],
-                 [images.PLATFORM, 566, 500],
-                 [images.PLATFORM, 800, 400],
-                 [images.PLATFORM, 833, 400],
-                 [images.PLATFORM, 866, 400],
-                 [images.PLATFORM, 1000, 500],
-                 [images.PLATFORM, 1033, 500],
-                 [images.PLATFORM, 1066, 500],
-                 [images.PLATFORM, 1120, 280],
-                 [images.PLATFORM, 1153, 280],
-                 [images.PLATFORM, 1186, 280]]
+    def reset(self):
+        Level.reset(self.over_level)
 
-        # Go through the array above and add platforms
-        for platform in level:
-            block = blocks.Platform(platform[0])
-            block.rect.x = platform[1]
-            block.rect.y = platform[2]
-            block.player = self.player
-            self.platform_list.add(block)
-
-        # Add a custom moving platform
-        block = blocks.HorizontalMovingPlatform(images.PLATFORM)
-        block.rect.x = 1350
-        block.rect.y = 280
-        block.boundary_left = 1350
-        block.boundary_right = 1600
-        block.change_x = 1
-        block.player = self.player
-        block.level = self
-        self.platform_list.add(block)
+    def end(self):
+        Level.end(self.over_level)

@@ -15,7 +15,8 @@ class Player(MovingSprite):
         self.jump_number = 0
         self.in_pipe = False
         self.pipe = None
-        self.life = 3
+        self.size = 3
+        self.lives = 5
         self.climbing = False
         self.swimming = False
         self.frame = 0
@@ -50,10 +51,10 @@ class Player(MovingSprite):
         self.rect.x += self.change_x
         # See if we hit anything
         if not self.climbing:
-            for platform in sprites.spritecollide(self, constants.CURRENT_LEVEL.platform_list):
+            for platform in sprites.sprite_collide(self, constants.CURRENT_LEVEL.platform_list):
                 platform.update_constants()
                 self.x_change(platform)
-            for block in sprites.spritecollide(self, constants.CURRENT_LEVEL.block_list):
+            for block in sprites.sprite_collide(self, constants.CURRENT_LEVEL.block_list):
                 block.update_constants()
                 self.x_change(block)
         elif not pygame.sprite.spritecollide(self, constants.CURRENT_LEVEL.wall_list, False):
@@ -62,8 +63,8 @@ class Player(MovingSprite):
         self.rect.y += self.change_y
         # See if we hit anything
         if not self.climbing:
-            platform_hit_list = sprites.spritecollide(self, constants.CURRENT_LEVEL.platform_list)
-            block_hit_list = sprites.spritecollide(self, constants.CURRENT_LEVEL.block_list)
+            platform_hit_list = sprites.sprite_collide(self, constants.CURRENT_LEVEL.platform_list)
+            block_hit_list = sprites.sprite_collide(self, constants.CURRENT_LEVEL.block_list)
             if len(platform_hit_list) > 0 or len(block_hit_list) > 0:
                 self.jump_number = 0
             for platform in platform_hit_list:
@@ -77,10 +78,13 @@ class Player(MovingSprite):
         elif not pygame.sprite.spritecollide(self, constants.CURRENT_LEVEL.wall_list, False):
             self.climbing = False
 
+        if self.rect.y > constants.HEIGHT:  # see if we're falling
+            self.decrease_size()
+
         # Looking if we hit an enemy or a reward
-        for enemy in sprites.spritecollide(self, constants.CURRENT_LEVEL.enemy_list):
+        for enemy in sprites.sprite_collide(self, constants.CURRENT_LEVEL.enemy_list):
             enemy.update_constants()
-        for reward in sprites.spritecollide(self, constants.CURRENT_LEVEL.reward_list):
+        for reward in sprites.sprite_collide(self, constants.CURRENT_LEVEL.reward_list):
             reward.update_constants()
 
     def x_change(self, platform):
@@ -91,29 +95,32 @@ class Player(MovingSprite):
             while pygame.sprite.collide_mask(platform, self):
                 self.rect.x += 1
 
-    def kill(self):
-        exit(0)
-
-    def remove_life(self):
-        self.life -= 1
-        if self.life == 0:
-            self.kill()
-        elif self.life == 1:
+    def decrease_size(self):
+        self.size -= 1
+        if self.size == 1:
             self.change_rect(images.MARIO_LITTLE)
 
-    def add_life(self):
-        self.life += 1
-        if self.life > 3:
-            self.life = 3
-        elif self.life == 2:
+    def increase_size(self):
+        self.size += 1
+        if self.size > 3:
+            self.size = 3
+        elif self.size == 2:
             self.change_rect(images.MARIO)
+
+    def add_life(self):
+        self.lives += 1
+
+    def remove_life(self):
+        self.lives -= 1
+        if self.lives == 0:
+            self.lives = 5
 
     def change_rect(self, image):
         self.mask = pygame.mask.from_surface(image)
         y = self.rect.bottom
         x = self.rect.x
         self.rect = image.get_rect()
-        self.rect.y = y - self.rect.height
+        self.rect.y = y - self.rect.height - 5
         self.rect.x = x
 
     def jump(self):
@@ -121,7 +128,7 @@ class Player(MovingSprite):
         if not self.swimming:
             self.climbing = False
             self.rect.y += 2
-            platform_hit_list = sprites.spritecollide(self, constants.CURRENT_LEVEL.platform_list)
+            platform_hit_list = sprites.sprite_collide(self, constants.CURRENT_LEVEL.platform_list)
             self.rect.y -= 2
 
             if len(platform_hit_list) > 0 or self.rect.bottom >= constants.HEIGHT:
@@ -148,6 +155,7 @@ class Player(MovingSprite):
     def go_up(self):
         if pygame.sprite.spritecollide(self, constants.CURRENT_LEVEL.wall_list, False):
             self.climbing = True
+            self.jump_number = 0
             self.change_y = -constants.PLAYER_SPEED
         elif self.swimming:
             self.change_y = -constants.PLAYER_SPEED
@@ -164,3 +172,7 @@ class Player(MovingSprite):
         self.swimming = boolean
         if self.swimming:
             self.change_rect(images.MARIO_SWIM)
+            constants.PLAYER_SPEED = constants.UNDERWATER_SPEED
+        else:
+            self.change_rect(images.MARIO)
+            constants.PLAYER_SPEED = constants.NORMAL_SPEED

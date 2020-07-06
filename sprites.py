@@ -4,7 +4,7 @@ import constants
 import images
 
 
-def spritecollide(sprite, group):
+def sprite_collide(sprite, group):
     return [s for s in group if pygame.sprite.collide_mask(s, sprite)]
 
 
@@ -34,22 +34,17 @@ class MovingSprite(SolidShape):
         else:
             self.change_y += gravity
 
-        # See if we are on the ground.
-        if self.rect.y >= constants.HEIGHT - self.rect.height and self.change_y >= 0:
-            self.change_y = 0
-            self.rect.y = constants.HEIGHT - self.rect.height
-
     def update(self, *args):
         self.calc_gravity()
         self.rect.x += self.change_x
-        if spritecollide(self, constants.CURRENT_LEVEL.platform_list):
+        if sprite_collide(self, constants.CURRENT_LEVEL.platform_list):
             self.change_x *= -1
-        elif spritecollide(self, constants.CURRENT_LEVEL.block_list):
+        elif sprite_collide(self, constants.CURRENT_LEVEL.block_list):
             self.change_x *= -1
         self.rect.y += self.change_y
-        for platform in spritecollide(self, constants.CURRENT_LEVEL.platform_list):
+        for platform in sprite_collide(self, constants.CURRENT_LEVEL.platform_list):
             self.y_change(platform)
-        for block in spritecollide(self, constants.CURRENT_LEVEL.block_list):
+        for block in sprite_collide(self, constants.CURRENT_LEVEL.block_list):
             self.y_change(block)
 
     def y_change(self, platform):
@@ -63,13 +58,17 @@ class MovingSprite(SolidShape):
 
 
 class Flag(SolidShape):
-    def __init__(self, next_level):
+    def __init__(self, shift):
         super().__init__(images.FLAG_IMAGE)
-        self.next_level = next_level
+        self.shift = shift
 
     def update_constants(self):
-        constants.CURRENT_LEVEL = self.next_level
-        self.next_level.begin()
+        constants.CURRENT_LEVEL.end()
+        if constants.CURRENT_LEVEL.player.rect.bottom < self.rect.y + 100:
+            constants.CURRENT_LEVEL.player.add_life()
+        constants.CURRENT_LEVEL = constants.MAP
+        constants.CURRENT_LEVEL.begin()
+        constants.CURRENT_LEVEL.shift_world = self.shift
 
 
 class Platform(SolidShape):
@@ -144,17 +143,21 @@ class BreakableBlock(Block):
 
 
 class QBlock(Block):
-    def __init__(self, x=0, y=0, reward=None):
+    def __init__(self, x=0, y=0, reward=None, down=False):
         super().__init__(images.Q_BLOCK, x, y)
         self.reward = reward
+        self.down = down
 
     def update_constants(self):
         if self.reward is not None:
-            pl_rect = constants.CURRENT_LEVEL.player.rect
-            if constants.GO_DOWN == constants.CURRENT_DIR:
+            if not self.down:
+                pl_rect = constants.CURRENT_LEVEL.player.rect
+                if constants.GO_DOWN == constants.CURRENT_DIR:
+                    self.reward_out(self.rect.bottom + 1)
+                elif pl_rect.y <= self.rect.bottom < pl_rect.bottom:
+                    self.reward_out(self.rect.y - self.reward.rect.height - 1)
+            else:
                 self.reward_out(self.rect.bottom + 1)
-            elif pl_rect.y <= self.rect.bottom < pl_rect.bottom:
-                self.reward_out(self.rect.y - self.reward.rect.height - 1)
 
     def reward_out(self, y):
         self.reward.player = constants.CURRENT_LEVEL.player
@@ -163,8 +166,9 @@ class QBlock(Block):
         constants.CURRENT_LEVEL.reward_list.add(self.reward)
         self.reward.out = True
         self.image = images.BLOCK
-        if isinstance(self.reward, Piece):
-            self.reward.add_piece()
+        if isinstance(self.reward, Coin):
+            self.reward.add_coin()
+            self.rect.y -= 10
         self.reward = None
 
 
@@ -199,7 +203,8 @@ class ClimbingWall(SolidShape):
 
 
 class Enemy(MovingSprite):
-    def __init__(self, image_l, image_r, x=0, y=0):
+    def __init__(self, image_l, image_r, x=0, y=0, killable=True):
+        self.killable = killable
         if image_l is not None:
             super().__init__(image_l, x, y)
         else:
@@ -225,18 +230,18 @@ class Enemy(MovingSprite):
                 self.image = self.image_l
             super().update()
             constants.CURRENT_LEVEL.enemy_list.remove(self)
-            if spritecollide(self, constants.CURRENT_LEVEL.enemy_list):
+            if sprite_collide(self, constants.CURRENT_LEVEL.enemy_list):
                 self.change_x *= -1
             constants.CURRENT_LEVEL.enemy_list.add(self)
             if not pygame.sprite.collide_mask(self, self.player):
                 self.eat = False
 
     def update_constants(self):
-        if self.player.rect.bottom - self.player.change_y <= self.rect.top + 20:
+        if self.player.rect.bottom - self.player.change_y <= self.rect.top + 20 and self.killable:
             self.kill()
         elif not self.eat:
             self.eat = True
-            self.player.remove_life()
+            self.player.decrease_size()
 
 
 class Koopa(Enemy):
@@ -276,7 +281,7 @@ class Spike(Enemy):
 
 class SpikeBomb(Enemy):
     def __init__(self, player, x, y=0):
-        super().__init__(images.SPIKE_BOMB, None, x, y)
+        super().__init__(images.SPIKE_BOMB, None, x, y, False)
         self.change_x = 0
         self.change_y = constants.ENEMY_SPEED
         self.player = player
@@ -289,7 +294,7 @@ class SpikeBomb(Enemy):
 
 class Cheep(Enemy, HorizontalMovingPlatform):
     def __init__(self, x, y, right, left):
-        Enemy.__init__(self, images.CHEEP_LEFT, images.CHEEP_RIGHT, x, y)
+        Enemy.__init__(self, images.CHEEP_LEFT, images.CHEEP_RIGHT, x, y, False)
         HorizontalMovingPlatform.__init__(self, images.CHEEP_RIGHT, x, y, right, left)
         self.change_x = constants.ENEMY_SPEED
 
@@ -300,7 +305,7 @@ class Hurchin(Enemy, VerticalMovingPlatform):
             self.image_l = images.BIG_HURCHIN
         else:
             self.image_l = images.HURCHIN
-        Enemy.__init__(self, self.image_l, None, x, y)
+        Enemy.__init__(self, self.image_l, None, x, y, False)
         self.change_x = 0
         VerticalMovingPlatform.__init__(self, self.image_l, x, y, top, bottom)
         self.change_y = constants.ENEMY_SPEED
@@ -321,18 +326,61 @@ class Reward(MovingSprite):
 
     def update_constants(self):
         self.kill()
-        self.player.add_life()
+        self.player.increase_size()
 
 
-class Piece(Reward):
-    def __init__(self, x=0, y=0, image=images.PIECE):
+class Coin(Reward):
+    def __init__(self, x=0, y=0, moving=False, speed=-constants.REWARD_SPEED * 0.0001, image=images.PIECE):
         super().__init__(image, x, y)
-        self.rect.y -= 10
-        self.change_x = -constants.REWARD_SPEED * 0.0001
+        if not moving:
+            self.change_x = 0
+            self.change_y = 0
+        else:
+            self.change_x = speed
+        self._moving = moving
 
     def update_constants(self):
-        self.add_piece()
+        self.add_coin()
 
-    def add_piece(self):
+    def update(self):
+        if self._moving:
+            Reward.update(self)
+
+    def add_coin(self):
         self.kill()
-        constants.PIECES += 1
+        constants.COIN += 1
+        if constants.COIN == 100:
+            constants.CURRENT_LEVEL.player.add_life()
+            constants.COIN = 0
+
+
+class StarCoin(Coin):
+    def __init__(self, x=0, y=0, position=0):
+        super().__init__(x, y, False, None, images.STAR_PIECE)
+        self.change_x = 0
+        self.position = position
+        self.found = False
+
+    def update_constants(self):
+        if not self.found:
+            self.rect.x = -100
+            self.rect.y = -100
+            self.image = images.STAR_PIECE_L
+            self.found = True
+        constants.CURRENT_LEVEL.reward_list.remove(self)
+
+    def update(self):
+        pass
+
+
+class LevelRound(SolidShape):
+    def __init__(self, x, y, level, shift=0):
+        super().__init__(images.LEVEL, x, y)
+        self.level = level
+        self.shift = shift
+
+    def update_constants(self):
+        if constants.CURRENT_DIR == constants.GO_DOWN:
+            self.level.shift_world(self.shift)
+            self.level.begin()
+            constants.CURRENT_LEVEL = self.level
