@@ -89,9 +89,9 @@ def get_mario(player):
             player.image = MARIO_CLIMB[0]
         elif player.swimming:
             player.image = SWIM_R[0]
-        elif player.life == 2:
+        elif player.size == 2:
             player.image = MARIO_STOP
-        elif player.life == 1:
+        elif player.size == 1:
             player.image = MARIO_STOP_L
         else:
             player.image = MARIO_STOP_B
@@ -106,16 +106,16 @@ def get_mario(player):
         else:
             player.current_image(player.current, None)
     elif constants.GO_RIGHT == constants.CURRENT_DIR:  # choosing adapted image depending on the current direction
-        if player.life == 2:
+        if player.size == 2:
             player.current_image(2, MARIO_RIGHT)
-        elif player.life == 1:
+        elif player.size == 1:
             player.current_image(2.1, MARIO_LITTLE_R)
         else:
             player.current_image(2.2, MARIO_BIG_R)
     elif constants.GO_LEFT == constants.CURRENT_DIR:
-        if player.life == 2:
+        if player.size == 2:
             player.current_image(3, MARIO_LEFT)
-        elif player.life == 1:
+        elif player.size == 1:
             player.current_image(3.1, MARIO_LITTLE_L)
         else:
             player.current_image(3.2, MARIO_BIG_L)
@@ -123,6 +123,7 @@ def get_mario(player):
 
 
 sheet = ImagesSheet("data/sprites_2.png")
+LEVEL = sheet.getimage(638, 16, 82, 49)
 FLAG_IMAGE = sheet.getimage(1341, 30, 156, 484)
 KOOPA_LEFT = sheet.getimage(85, 1, 62, 79)
 KOOPA_RIGHT = sheet.getimage(150, 1, 62, 79)
@@ -134,6 +135,7 @@ SPIKE = sheet.getimage(1195, 5, 84, 131)
 SPIKE_BOMB = sheet.getimage(1201, 233, 84, 84)
 HURCHIN = sheet.getimage(1178, 343, 115, 115)
 BIG_HURCHIN = sheet.getimage(341, 580, 310, 287)
+PYRANA_PLANT = sheet.getimage(665, 480, 52, 256)
 PLATFORM = sheet.getimage(580, 179, 46, 24)
 PLATFORM_Y = sheet.getimage(943, 231, 200, 45)
 BLOCK = sheet.getimage(259, 179, 46, 47)
@@ -154,6 +156,8 @@ PIPE_Y_B = sheet.getimage(59, 448, 90, 35)
 PIPE_B = sheet.getimage(908, 317, 95, 55)
 PIPE_B_C = sheet.getimage(908, 374, 95, 35)
 PIECE = sheet.getimage(813, 89, 38, 45)
+STAR_PIECE = sheet.getimage(762, 500, 129, 126)
+STAR_PIECE_L = sheet.getimage(911, 505, 46, 45)
 sheet = ImagesSheet("data/level_1.png")
 GROUND = sheet.getimage(0, 0, 142, 70)
 GROUND_C = sheet.getimage(0, 22, 142, 48)

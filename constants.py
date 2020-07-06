@@ -13,12 +13,15 @@ CURRENT_DIR = -1
 TOOK_PIPE = False
 TOKEN_PIPE = None
 PLAYER_SPEED = 5
+NORMAL_SPEED = 5
+UNDERWATER_SPEED = 3
 PLAYER_JUMP = 7
 
 # ---- Level constants ----
 
 CURRENT_LEVEL = None
 START_SPACE = 300
+MAP = None
 
 # ---- Sprites constants ----
 
@@ -28,4 +31,4 @@ DEFAULT_SPEED = 5
 GRAVITY = .40
 UNDERWATER_GRAVITY = .005
 BLOCK_SPEED = 2
-PIECES = 0
+COIN = 0
