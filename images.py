@@ -98,7 +98,7 @@ def get_sized_mario(little, middle, big, player, number=None):
         player.current_image(number + .2, big)
 
 
-sheet = ImagesSheet("data/sprites_2.png")
+sheet = ImagesSheet("data/sprites.png")
 LEVEL = sheet.getimage(638, 16, 82, 49)
 FLAG_IMAGE = sheet.getimage(1341, 30, 156, 484)
 KOOPA_LEFT = sheet.getimage(85, 1, 62, 79)

@@ -52,6 +52,7 @@ class Level2(level.Level):
 
     def begin(self):
         self.player.set_swim(True)
+        constants.PLAYER_SPEED = constants.UNDERWATER_SPEED
 
 
 class Level2_1(level.SubLevel):

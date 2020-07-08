@@ -39,23 +39,24 @@ class MovingSprite(SolidShape):
 
     def update(self, *args):
         self.calc_gravity()
-        self.rect.x += self.change_x
-        if sprite_collide(self, constants.CURRENT_LEVEL.platform_list):
-            self.change_x *= -1
-        elif sprite_collide(self, constants.CURRENT_LEVEL.block_list):
-            self.change_x *= -1
         self.rect.y += self.change_y
-        for platform in sprite_collide(self, constants.CURRENT_LEVEL.platform_list):
+        platforms = constants.CURRENT_LEVEL.platform_list
+        blocks = constants.CURRENT_LEVEL.block_list
+        for platform in sprite_collide(self, platforms):
             self.y_change(platform)
-        for block in sprite_collide(self, constants.CURRENT_LEVEL.block_list):
+        for block in sprite_collide(self, blocks):
             self.y_change(block)
+        self.rect.x += self.change_x
+        if sprite_collide(self, platforms) or sprite_collide(self, blocks):
+            self.rect.x -= self.change_x
+            self.change_x *= -1
 
     def y_change(self, platform):
         if self.change_y > 0:
-            while pygame.sprite.collide_mask(platform, self):
+            while pygame.sprite.collide_mask(self, platform):
                 self.rect.y -= 1
         elif self.change_y < 0:
-            while pygame.sprite.collide_mask(platform, self):
+            while pygame.sprite.collide_mask(self, platform):
                 self.rect.y += 1
         self.change_y = 0
 

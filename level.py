@@ -27,6 +27,7 @@ class Level:
         self.player.climbing = False
         self.player.swimming = False
         self.player.jump_number = 0
+        constants.PLAYER_SPEED = constants.NORMAL_SPEED
         if self.player.size > 1:
             self.player.change_rect(images.MARIO)
         else:
@@ -77,10 +78,10 @@ class Level:
         self.reset()
         for coin in coins:
             if coin.found:
+                self.star_coins.add(coin)
                 for c in self.reward_list:
                     if isinstance(c, StarCoin) and c.position == coin.position:
                         self.star_coins.remove(c)
-                        self.star_coins.add(coin)
                         self.reward_list.remove(c)
                         self.reward_list.add(coin)
                         break
