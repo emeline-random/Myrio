@@ -1,19 +1,21 @@
-import images
 import pygame
+
+import utils
 from level import Level
 from level_1 import Level1
+import images
+import constants
 import sprites
 from level_2 import Level2
-import constants
 
-MENU_PLATFORMS = pygame.image.load("data/Menu.png")
+MENU_PLATFORMS = pygame.image.load(constants.PATH + "Menu.png")
 
 
 class Map(Level):
 
     def __init__(self, player):
         super().__init__(player)
-        self.background = pygame.image.load("data/background_menu.png").convert()
+        self.background = pygame.image.load(constants.PATH + "background_menu.png").convert()
         self.max_frames = 1
 
         menu_levels = [sprites.LevelRound(141, 440, Level1(self.player)),
@@ -40,3 +42,6 @@ class Map(Level):
 
     def shift_world(self, shift_x):
         self.player.rect.x += shift_x
+
+    def load_sound(self):
+        utils.change_sound(constants.PATH + 'menu_sound.mp3')

@@ -1,6 +1,7 @@
 WHITE = [0, 0, 0]
 HEIGHT = 550
 WIDTH = 1520
+PATH = './data/'
 
 # ---- Player constants ----
 
@@ -11,7 +12,7 @@ GO_DOWN = 3
 CLIMB = 4
 CURRENT_DIR = -1
 PLAYER_SPEED = 5
-NORMAL_SPEED = 5
+NORMAL_SPEED = 10
 UNDERWATER_SPEED = 3
 PLAYER_JUMP = 7
 

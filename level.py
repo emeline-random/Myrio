@@ -1,6 +1,6 @@
 import pygame
-import constants
 import images
+import constants
 from sprites import Flag
 from sprites import StarCoin
 
@@ -32,6 +32,7 @@ class Level:
             self.player.change_rect(images.MARIO)
         else:
             self.player.change_rect(images.MARIO_LITTLE)
+        self.load_sound()
 
     def update(self):
         for aList in self.lists:
@@ -85,6 +86,9 @@ class Level:
                         self.reward_list.remove(c)
                         self.reward_list.add(coin)
                         break
+
+    def load_sound(self):
+        pass
 
 
 class SubLevel(Level):

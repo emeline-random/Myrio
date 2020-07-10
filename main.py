@@ -1,10 +1,10 @@
 import pygame
 
+import images
 import constants
 import utils
 from map import Map
 from player import Player
-import images
 
 
 def main():
@@ -13,9 +13,9 @@ def main():
 
     size = [constants.WIDTH, constants.HEIGHT]
     screen = pygame.display.set_mode(size)
-    font = pygame.font.Font('data/font.ttf', 60)
-    font_l = pygame.font.Font('data/font.ttf', 35)
-    pygame.display.set_caption("Dino game")
+    font = pygame.font.Font(constants.PATH + 'font.ttf', 60)
+    font_l = pygame.font.Font(constants.PATH + 'font.ttf', 35)
+    pygame.display.set_caption("Myrio")
     player = Player()
     constants.MAP = Map(player)
 

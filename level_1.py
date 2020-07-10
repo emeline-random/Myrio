@@ -1,8 +1,8 @@
-import constants
-import images
-import sprites
-import level
 import pygame
+import images
+import level
+import constants
+import sprites
 import utils
 
 
@@ -10,12 +10,12 @@ class Level1(level.Level):
     def __init__(self, player):
         level.Level.__init__(self, player)
 
-        self.background = pygame.image.load("data/background_l1.png").convert()
+        self.background = pygame.image.load(constants.PATH + "background_l1.png").convert()
         self.background.set_colorkey(constants.WHITE)
         self.max_frames = 2
         self.number = 0
 
-        platforms = sprites.Platform(pygame.image.load("data/level_1.png"), 0, 0)
+        platforms = sprites.Platform(pygame.image.load(constants.PATH + "level_1.png"), 0, 0)
         platforms.player = self.player
         self.platform_list.add(platforms)
 
@@ -72,20 +72,23 @@ class Level1(level.Level):
             if isinstance(aBlock, sprites.BreakableBlock):
                 aBlock.level = self
 
+    def load_sound(self):
+        utils.change_sound(constants.PATH + 'level1_sound.mp3')
+
 
 class Level1_1(level.SubLevel):
     def __init__(self, player, over_level):
         super().__init__(player, over_level)
-        self.background = pygame.image.load("data/background_l1-1.png").convert()
+        self.background = pygame.image.load(constants.PATH + "background_l1-1.png").convert()
         self.background.set_colorkey(constants.WHITE)
         self.max_frames = 1
         self.number = 0
 
-        platforms = sprites.Platform(pygame.image.load("data/level_1-1.png"), 0, 0)
+        platforms = sprites.Platform(pygame.image.load(constants.PATH + "level_1-1.png"), 0, 0)
         platforms.player = self.player
         self.platform_list.add(platforms)
 
-        pipe = sprites.Pipe(over_level, 2500, 3774, 336,
+        pipe = sprites.Pipe(over_level, 2445, 3774, 336,
                             images.get_platform(images.PIPE_G, images.PIPE_G.get_rect().width, 225, images.PIPE_G_C))
         pipe.level = self
         pipe.player = self.player
@@ -126,12 +129,12 @@ class Level1_1(level.SubLevel):
 class Level1_2(level.SubLevel):
     def __init__(self, player, over_level):
         super().__init__(player, over_level)
-        self.background = pygame.image.load("data/background_l1.png").convert()
+        self.background = pygame.image.load(constants.PATH + "background_l1.png").convert()
         self.background.set_colorkey(constants.WHITE)
         self.max_frames = 0
         self.number = 0
 
-        platforms = sprites.Platform(pygame.image.load("data/level_1-2.png"), 0, 0)
+        platforms = sprites.Platform(pygame.image.load(constants.PATH + "level_1-2.png"), 0, 0)
         platforms.player = self.player
         self.platform_list.add(platforms)
 
@@ -141,3 +144,6 @@ class Level1_2(level.SubLevel):
 
         utils.add_all(level_enemies, self.enemy_list, None, self.player)
         self.add_flag(25)
+
+    def load_sound(self):
+        utils.change_sound(constants.PATH + 'level1_sound.mp3')

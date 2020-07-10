@@ -1,7 +1,7 @@
 import pygame
 
-import constants
 import images
+import constants
 import utils
 
 
@@ -66,11 +66,14 @@ class Flag(SolidShape):
     def __init__(self, shift):
         super().__init__(images.FLAG_IMAGE)
         self.shift = shift
+        self.reach = False
 
     def update_constants(self):
-        constants.CURRENT_LEVEL.end()
+        self.reach = True
+        utils.play_effect(utils.STAGE_CLEAR)
         if constants.CURRENT_LEVEL.player.rect.bottom < self.rect.y + 100:
             constants.CURRENT_LEVEL.player.add_life()
+        constants.CURRENT_LEVEL.end()
         utils.change_level(constants.MAP)
         constants.CURRENT_LEVEL.shift_world = self.shift
 
@@ -143,6 +146,7 @@ class BreakableBlock(Block):
     def update_constants(self):
         pl_rect = constants.CURRENT_LEVEL.player.rect
         if pl_rect.y <= self.rect.bottom < pl_rect.bottom or constants.GO_DOWN == constants.CURRENT_DIR:
+            utils.play_effect(utils.BLOCK_BREAKS)
             self.kill()
 
 
@@ -173,7 +177,6 @@ class QBlock(Block):
         self.image = images.BLOCK
         if isinstance(self.reward, Coin):
             self.reward.add_coin()
-            self.rect.y -= 10
         self.reward = None
 
 
@@ -203,11 +206,10 @@ class Pipe(SolidShape):
         self.player.in_pipe = True
         self.player.pipe = self
         if in_pipe:
+            utils.play_effect(utils.PIPE)
             utils.change_level(self.relative_level)
-            constants.CURRENT_LEVEL = self.relative_level
             self.player.pipe = None
             self.player.in_pipe = False
-            constants.CURRENT_LEVEL.begin()
             constants.CURRENT_LEVEL.shift_world(-self.level_shift - constants.CURRENT_LEVEL.world_shift)
 
 
@@ -254,6 +256,7 @@ class Enemy(MovingSprite):
 
     def update_constants(self):
         if self.player.rect.bottom - self.player.change_y <= self.rect.top + 20 and self.killable:
+            utils.play_effect(utils.KICK)
             self.kill()
         elif not self.eat:
             self.eat = True
@@ -348,6 +351,7 @@ class Reward(MovingSprite):
     def update_constants(self):
         self.kill()
         self.player.increase_size()
+        utils.play_effect(utils.POWER_UP)
 
 
 class Coin(Reward):
@@ -369,6 +373,7 @@ class Coin(Reward):
             Reward.update(self)
 
     def add_coin(self):
+        utils.play_effect(utils.COIN)
         self.kill()
         constants.COIN += 1
         if constants.COIN == 100:
@@ -386,6 +391,7 @@ class StarCoin(Coin):
 
     def update_constants(self):
         if not self.found:
+            utils.play_effect(utils.COIN)
             self.rect.x = -100
             self.rect.y = -100
             self.image = images.STAR_PIECE_L

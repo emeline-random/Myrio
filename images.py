@@ -44,7 +44,7 @@ def paint_width(surface, image, y):
         i += image.get_rect().width
 
 
-sheet = ImagesSheet("data/mario.png")
+sheet = ImagesSheet(constants.PATH + "mario.png")
 MARIO_RIGHT = sheet.get_images(25, 90, 68, 22)
 MARIO_LEFT = sheet.get_images(25, 90, 68, 126)
 MARIO_JUMP = sheet.getimage(1019, 3, 71, 89)
@@ -98,7 +98,7 @@ def get_sized_mario(little, middle, big, player, number=None):
         player.current_image(number + .2, big)
 
 
-sheet = ImagesSheet("data/sprites.png")
+sheet = ImagesSheet(constants.PATH + "sprites.png")
 LEVEL = sheet.getimage(638, 16, 82, 49)
 FLAG_IMAGE = sheet.getimage(1341, 30, 156, 484)
 KOOPA_LEFT = sheet.getimage(85, 1, 62, 79)
@@ -134,7 +134,7 @@ PIPE_B_C = sheet.getimage(908, 374, 95, 35)
 PIECE = sheet.getimage(813, 89, 38, 45)
 STAR_PIECE = sheet.getimage(762, 500, 129, 126)
 STAR_PIECE_L = sheet.getimage(911, 505, 46, 45)
-sheet = ImagesSheet("data/platforms.png")
+sheet = ImagesSheet(constants.PATH + "platforms.png")
 GROUND = sheet.getimage(0, 0, 142, 70)
 GROUND_C = sheet.getimage(0, 22, 142, 48)
 FLOWERS = sheet.getimage(0, 78, 190, 119)
@@ -143,7 +143,7 @@ FLOWERS_B = sheet.getimage(0, 270, 190, 30)
 COLUMN = sheet.getimage(154, 1, 46, 47)
 COLUMN_C = sheet.getimage(212, 0, 46, 72)
 COLUMN_B = sheet.getimage(154, 49, 46, 25)
-sheet = ImagesSheet("data/gake.png")
+sheet = ImagesSheet(constants.PATH + "gake.png")
 WALL = sheet.getimage(289, 72, 95, 25)
 WALL_C = sheet.getimage(289, 97, 95, 46)
 WALL_B = sheet.getimage(289, 146, 95, 16)

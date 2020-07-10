@@ -1,9 +1,9 @@
-import constants
-import images
-import sprites
-import level
 import pygame
 from level_1 import Level1_2
+import images
+import level
+import constants
+import sprites
 import utils
 
 
@@ -11,12 +11,12 @@ class Level2(level.Level):
     def __init__(self, player):
         level.Level.__init__(self, player)
 
-        self.background = pygame.image.load("data/background_l2.png").convert()
+        self.background = pygame.image.load(constants.PATH + "background_l2.png").convert()
         self.background.set_colorkey(constants.WHITE)
         self.max_frames = 2
         self.number = 0
 
-        platforms = sprites.Platform(pygame.image.load("data/level_2.png"), 0, 0)
+        platforms = sprites.Platform(pygame.image.load(constants.PATH + "level_2.png"), 0, 0)
         platforms.player = self.player
         self.platform_list.add(platforms)
 
@@ -53,12 +53,16 @@ class Level2(level.Level):
     def begin(self):
         self.player.set_swim(True)
         constants.PLAYER_SPEED = constants.UNDERWATER_SPEED
+        self.load_sound()
+
+    def load_sound(self):
+        utils.change_sound(constants.PATH + 'level2_sound.mp3')
 
 
 class Level2_1(level.SubLevel):
     def __init__(self, player, over_level):
         super().__init__(player, over_level)
-        self.background = pygame.image.load("data/background_l2-1.png").convert()
+        self.background = pygame.image.load(constants.PATH + "background_l2-1.png").convert()
 
         level_platforms = [sprites.Platform(images.get_platform(images.PIPE_R, 90, 145, images.PIPE_R_C), 210, 412),
                            sprites.VerticalMovingPlatform(images.PLATFORM_Y, 380, 365, 175, 475),

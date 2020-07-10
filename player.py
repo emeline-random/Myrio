@@ -1,9 +1,10 @@
 import pygame
 
-import constants
+import utils
 from sprites import MovingSprite
-import sprites
 import images
+import constants
+import sprites
 
 
 class Player(MovingSprite):
@@ -100,6 +101,8 @@ class Player(MovingSprite):
         self.size -= 1
         if self.size == 1:
             self.change_rect(images.MARIO_LITTLE)
+        elif self.size == 0:
+            utils.play_effect(utils.MARIO_DIES)
 
     def increase_size(self):
         self.size += 1
