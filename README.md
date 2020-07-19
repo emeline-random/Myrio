@@ -1,2 +1,2 @@
 # Myrio
-Mario Bros game made with Pygame. Mario can run, jump, climb and swim and different kinds of blocks and platforms (moving or not). Some enemies have been created and Mario looses a life each time an enemy touches him, if he is running its appearance will change depending on the number of his lives (unfortunately, spritesheet for other actions hasn't been found for the little Mario). Each time Mario has a super mushroom, he wins a living (max 3 of lives). Pipes can be used to go from one level to another such as flags.
+Mario Bros game made with Pygame including sounds and 2 levels (with enemies, pipes, star-coins, ...). 
