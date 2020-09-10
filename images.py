@@ -49,8 +49,14 @@ MARIO_RIGHT = sheet.get_images(25, 90, 68, 22)
 MARIO_LEFT = sheet.get_images(25, 90, 68, 126)
 MARIO_JUMP = sheet.getimage(1019, 3, 71, 89)
 MARIO_CLIMB = sheet.get_images(14, 81, 48, 227)
+MARIO_CLIMB_BIG = sheet.get_images(14, 81, 48, 850)
+MARIO_CLIMB_LITTLE = sheet.get_images(14, 59, 38, 940)
 SWIM_R = sheet.get_images(14, 73, 71, 691)
+SWIM_R_BIG = sheet.get_images(14, 73, 71, 1003)
+SWIM_R_LITTLE = sheet.get_images(14, 50, 60, 1175)
 SWIM_L = sheet.get_images(14, 73, 71, 764)
+SWIM_L_BIG = sheet.get_images(14, 73, 71, 1088)
+SWIM_L_LITTLE = sheet.get_images(14, 50, 60, 1232)
 MARIO_STOP = sheet.getimage(707, 220, 53, 90)
 MARIO_STOP_L = sheet.getimage(926, 247, 38, 58)
 MARIO_STOP_B = sheet.getimage(988, 215, 86, 90)
@@ -67,19 +73,19 @@ def get_mario(player):
     if not player.moving:
         player.frame = 0
         if player.climbing:
-            player.image = MARIO_CLIMB[0]
+            get_sized_mario(MARIO_CLIMB_LITTLE[0], MARIO_CLIMB[0], MARIO_CLIMB_BIG[0], player, -2)
         elif player.swimming:
-            player.image = SWIM_R[0]
+            get_sized_mario(SWIM_R_LITTLE[0], SWIM_R[0], SWIM_R_BIG[0], player, -3)
         else:
             get_sized_mario(MARIO_STOP_L, MARIO_STOP, MARIO_STOP_B, player, -1)
         return
     elif player.climbing:
-        player.current_image(0, MARIO_CLIMB)
+        get_sized_mario(MARIO_CLIMB_LITTLE, MARIO_CLIMB, MARIO_CLIMB_BIG, player, 0)
     elif player.swimming:
         if constants.GO_RIGHT == constants.CURRENT_DIR:
-            player.current_image(2.3, SWIM_R)
+            get_sized_mario(SWIM_R_LITTLE, SWIM_R, SWIM_R_BIG, player, 4)
         elif constants.GO_LEFT == constants.CURRENT_DIR:
-            player.current_image(3.3, SWIM_L)
+            get_sized_mario(SWIM_L_LITTLE, SWIM_L, SWIM_L_BIG, player, 5)
         else:
             player.current_image(player.current, None)
     elif player.change_x > 0:  # choosing adapted image depending on the current direction
